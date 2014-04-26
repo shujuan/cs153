@@ -9,7 +9,7 @@
 static void syscall_handler (struct intr_frame *f UNUSED)
 {
   int arg[MAX_ARGS];
-  int esp = getpage_prt((const void v)f->esp);
+  int esp = getpage_prt((const void *)f->esp);
   switch (*(int *)esp)
   case SYS_HALT
   {
@@ -25,7 +25,7 @@ static void syscall_handler (struct intr_frame *f UNUSED)
   }
 }
 
-pid_t exec(const char * cmd_line)
+pid_t exec(const char* cmd_line)
 {
   pid_t pid = process_execute(cmd_line);
   struct child_process *cp = get_child_process(pid);
