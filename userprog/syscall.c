@@ -9,6 +9,8 @@
 
 struct lock *syslock;
 int fd = 1;
+struct list file_list;
+list_init(file_list);
 
 static void syscall_handler (struct intr_frame *f UNUSED)
 {
@@ -95,7 +97,7 @@ int open(const char* file)
   {
     fd++;
     f->fd = fd;
-    struct process_file *pf
+    list_push_back(&file_list,&f->fd);
     lock_release(syslock);
     return fd;                            //???????????????????/
   }
@@ -103,8 +105,26 @@ int open(const char* file)
 
 int filesize(int fd)
 {
+  struct list_elem *e;
   lock_acquire(syslock);
-  
+  for (e = list_begin (&f->file_list); e != list_end (&f->file_list);
+       e = list_next (e))
+  {
+    struct file *f = list_entry (e, struct file, elem);
+    if (fd == f->fd)
+	    {
+	      return f->file;
+	    }
+  }
+}
+
+int read (int fd, void *buffer, unsigned size)
+{
+  if(fd == 0)
+  {
+    int i;
+    int*    /////////////////////////////////////// to resume
+  }
 }
 
 void
