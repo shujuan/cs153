@@ -8,6 +8,7 @@
 #define MAX_ARGS 3
 
 struct lock *syslock;
+int fd = 1;
 
 static void syscall_handler (struct intr_frame *f UNUSED)
 {
@@ -83,6 +84,26 @@ bool remove(const char* file)
 
 int open(const char* file)
 {
+  lock_acquire(syslock);
+  struct file* f = filesys_open(file);
+  if(!f)
+  {
+    lock_release(syslock);
+    return -1;
+  }
+  else
+  {
+    fd++;
+    f->fd = fd;
+    struct process_file *pf
+    lock_release(syslock);
+    return fd;                            //???????????????????/
+  }
+}
+
+int filesize(int fd)
+{
+  lock_acquire(syslock);
   
 }
 
