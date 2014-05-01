@@ -54,7 +54,7 @@ start_process (void *file_name_)
   struct intr_frame if_;
   bool success;
   char *saveptr;
-  filename = strtok_r((char*)filename, &saveptr);
+  filename = strtok_r((char*)filename, " ", &saveptr);
 
   /* Initialize interrupt frame and load executable. */
   memset (&if_, 0, sizeof if_);
