@@ -53,6 +53,8 @@ start_process (void *file_name_)
   char *file_name = file_name_;
   struct intr_frame if_;
   bool success;
+  char *saveptr;
+  filename = strtok_r((char*)filename, &saveptr)
 
   /* Initialize interrupt frame and load executable. */
   memset (&if_, 0, sizeof if_);
@@ -60,11 +62,18 @@ start_process (void *file_name_)
   if_.cs = SEL_UCSEG;
   if_.eflags = FLAG_IF | FLAG_MBS;
   success = load (file_name, &if_.eip, &if_.esp);
+  
+  if(success) {thread_current()->cp->load = LOADED;}
+  else {thread_current()->cp->load = LOAD_FAIL;}
+  sema_up(&thread_current()->cp->load_sema;)
 
   /* If load failed, quit. */
   palloc_free_page (file_name);
   if (!success) 
     thread_exit ();
+    
+  asm volatile("mou %0, %%esp; jmp intr_exit" :: "g" (&if_):"memory");
+  NOT_REACHED();
 
   /* Start the user process by simulating a return from an
      interrupt, implemented by intr_exit (in
