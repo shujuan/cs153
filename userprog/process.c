@@ -18,6 +18,8 @@
 #include "threads/thread.h"
 #include "threads/vaddr.h"
 
+#include "threads/synch.h"								/* Implemented in project 2 */
+
 static thread_func start_process NO_RETURN;
 static bool load (const char *cmdline, void (**eip) (void), void **esp, char **saveptr);
 
@@ -65,7 +67,7 @@ start_process (void *file_name_)
   
   if(success) {thread_current()->cp->load = LOADED;}
   else {thread_current()->cp->load = LOAD_FAIL;}
-  sema_up(&thread_current()->cp->load_sema;)
+  sema_up(thread_current()->cp->load_sema);
 
   /* If load failed, quit. */
   palloc_free_page (file_name);
@@ -316,7 +318,7 @@ load (const char *file_name, void (**eip) (void), void **esp, char **saveptr)
 
   success = true;
   
-  saveptr = &filename;                         //???????????????????????????????????????
+  saveptr = &file_name;                        
 
  done:
   /* We arrive here whether the load is successful or not. */
