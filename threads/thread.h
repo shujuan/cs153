@@ -5,6 +5,9 @@
 #include <list.h>
 #include <stdint.h>
 
+#define LOADED 1
+#define LOAD_FAIL 0
+
 /* States in a thread's life cycle. */
 enum thread_status
   {
@@ -90,8 +93,9 @@ struct thread
     int priority;                       /* Priority. */
     struct list_elem allelem;           /* List element for all threads list. */
 
-	// Used in project 2, cp means the child process of thread.
-	struct thread *cp;
+	// Used in project 2
+	struct thread *cp;					/* cp means the child process of thread. */
+	bool load;							/* determine whether the loading is successful or not */
 
 	// Used in project 1, wake_tickes means the time for the thread to wake up.
 	uint32_t wake_ticks;
