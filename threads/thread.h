@@ -5,7 +5,8 @@
 #include <list.h>
 #include <stdint.h>
 
-#define LOADED 1
+#define LOADED 2				/* Implememted in project 2 */
+#define NOT_LOADED 1
 #define LOAD_FAIL 0
 
 /* States in a thread's life cycle. */
@@ -93,12 +94,14 @@ struct thread
     int priority;                       /* Priority. */
     struct list_elem allelem;           /* List element for all threads list. */
 
-	// Used in project 2
+	/* Implemented in project 2 */
 	struct thread *cp;					/* cp means the child process of thread. */
-	bool load;							/* determine whether the loading is successful or not */
+	uint8_t load;						/* determine whether the loading is successful or not */
+	struct semaphore *load_sema;			/* load the semaphone of current thread */
 
-	// Used in project 1, wake_tickes means the time for the thread to wake up.
-	uint32_t wake_ticks;
+
+	/* Implemented in project 1 */
+	uint32_t wake_ticks;				/* wake_tickes means the time for the thread to wake up. */
 
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
