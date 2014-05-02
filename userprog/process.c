@@ -19,7 +19,7 @@
 #include "threads/vaddr.h"
 
 static thread_func start_process NO_RETURN;
-static bool load (const char *cmdline, void (**eip) (void), void **esp);
+static bool load (const char *cmdline, void (**eip) (void), void **esp, char **saveptr);
 
 /* Starts a new thread running a user program loaded from
    FILENAME.  The new thread may be scheduled (and may even exit)
@@ -54,7 +54,7 @@ start_process (void *file_name_)
   struct intr_frame if_;
   bool success;
   char *saveptr;
-  filename = strtok_r((char*)filename, " ", &saveptr);
+  file_name = strtok_r((char*)file_name, " ", &saveptr);
 
   /* Initialize interrupt frame and load executable. */
   memset (&if_, 0, sizeof if_);
