@@ -90,6 +90,12 @@ struct thread
     int priority;                       /* Priority. */
     struct list_elem allelem;           /* List element for all threads list. */
 
+	// Used in project 2, cp means the child process of thread.
+	struct thread *cp;
+
+	// Used in project 1, wake_tickes means the time for the thread to wake up.
+	uint32_t wake_ticks;
+
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
 
