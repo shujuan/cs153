@@ -9,8 +9,6 @@
 
 struct lock *syslock;
 int fd = 1;
-struct list file_list;
-list_init(file_list);
 
 static void syscall_handler (struct intr_frame *f UNUSED)
 {
@@ -29,6 +27,17 @@ static void syscall_handler (struct intr_frame *f UNUSED)
     f->eax = exec((const void *)argv[0]);
     break;
   }
+  case SYS_EXEC{}
+  case SYS_WAIT{}
+  case SYS_CREATE{}
+  case SYS_REMOVE{}
+  case SYS_OPEN{}
+  case SYS_FILESIZE{}
+  case SYS_READ{}
+  case SYS_WRITE{}
+  case SYS_SEEK{}
+  case SYS_TELL{}
+  case SYS_CLOSE{}
 }
 
 pid_t exec(const char* cmd_line)
@@ -84,10 +93,15 @@ bool remove(const char* file)
   return success;
 }
 
-int open(const char* file)
+/*struct file *find_file(int fd)
+{
+  struct
+}*/
+
+int open(const char* file) // ??????????????????
 {
   lock_acquire(syslock);
-  struct file* f = filesys_open(file);
+  struct process_file *f = filesys_open(file); // ???
   if(!f)
   {
     lock_release(syslock);
@@ -97,7 +111,7 @@ int open(const char* file)
   {
     fd++;
     f->fd = fd;
-    list_push_back(&file_list,&f->fd);
+    list_push_back(&thread_current()->file_list,&f->fd);
     lock_release(syslock);
     return fd;                            //???????????????????/
   }
@@ -113,18 +127,27 @@ int filesize(int fd)
     struct file *f = list_entry (e, struct file, elem);
     if (fd == f->fd)
 	    {
+		  lock_release(syslock);
 	      return f->file;
 	    }
   }
+  lock_release(syslock);
+  return -1;
 }
 
 int read (int fd, void *buffer, unsigned size)
 {
-  if(fd == 0)
+  if(fd == STDIN_FILENO)
   {
     int i;
-    int*    /////////////////////////////////////// to resume
+	for(i=0; i<size; i++)
+	{
+	  buffer[i]=input_getc(); // ??? problematic
+	}
+	return size;
   }
+  lock_acquire(syslock);
+
 }
 
 void
