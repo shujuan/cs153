@@ -97,7 +97,8 @@ struct thread
 	/* Implemented in project 2 */
 	struct thread *cp;					/* cp means the child process of thread. */
 	uint8_t load;						/* determine whether the loading is successful or not */
-	struct semaphore *load_sema;			/* load the semaphone of current thread */
+	struct semaphore *load_sema;		/* load the semaphone of current thread */
+	struct list file_list;				/* store the list of files of the thread */
 
 
 	/* Implemented in project 1 */
