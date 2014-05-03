@@ -203,7 +203,8 @@ struct Elf32_Phdr
 #define PF_W 2          /* Writable. */
 #define PF_R 4          /* Readable. */
 
-static bool setup_stack (void **esp);
+//static bool setup_stack (void **esp, const char* file_name, char** save_ptr)  (void **esp);
+static bool setup_stack (void **esp, const char* file_name, char** save_ptr); // implemented
 static bool validate_segment (const struct Elf32_Phdr *, struct file *);
 static bool load_segment (struct file *file, off_t ofs, uint8_t *upage,
                           uint32_t read_bytes, uint32_t zero_bytes,
@@ -310,7 +311,7 @@ load (const char *file_name, void (**eip) (void), void **esp, char **saveptr)
     }
 
   /* Set up stack. */
-  if (!setup_stack (esp))
+  if (!setup_stack (esp,file_name,saveptr))
     goto done;
 
   /* Start address. */
@@ -436,7 +437,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 
 /* Create a minimal stack by mapping a zeroed page at the top of
    user virtual memory. */
-static bool
+/*static bool
 setup_stack (void **esp) 
 {
   uint8_t *kpage;
@@ -451,6 +452,78 @@ setup_stack (void **esp)
       else
         palloc_free_page (kpage);
     }
+  return success;
+  // implement here...
+}*/
+
+#define WORD_SIZE 4
+#define DEFAULT_ARGV 2
+
+static bool
+setup_stack (void **esp, const char* file_name, char** save_ptr) 
+{
+  uint8_t *kpage;
+  bool success = false;
+
+  kpage = palloc_get_page (PAL_USER | PAL_ZERO);
+  if (kpage != NULL) 
+    {
+      success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
+      if (success)
+        *esp = PHYS_BASE;
+      else
+	{
+	  palloc_free_page (kpage);
+	  return success;
+	}
+    }
+
+  char *token;
+  char **argv = malloc(DEFAULT_ARGV*sizeof(char *));
+  int i, argc = 0, argv_size = DEFAULT_ARGV;
+
+  // Push args onto stack
+  for (token = (char *) file_name; token != NULL;
+       token = strtok_r (NULL, " ", save_ptr))
+    {
+      *esp -= strlen(token) + 1;
+      argv[argc] = *esp;
+      argc++;
+      // Resize argv
+      if (argc >= argv_size)
+	{
+	  argv_size *= 2;
+	  argv = realloc(argv, argv_size*sizeof(char *));
+	}
+      memcpy(*esp, token, strlen(token) + 1);
+    }
+  argv[argc] = 0;
+  // Align to word size (4 bytes)
+  i = (size_t) *esp % WORD_SIZE;
+  if (i)
+    {
+      *esp -= i;
+      memcpy(*esp, &argv[argc], i);
+    }
+  // Push argv[i] for all i
+  for (i = argc; i >= 0; i--)
+    {
+      *esp -= sizeof(char *);
+      memcpy(*esp, &argv[i], sizeof(char *));
+    }
+  // Push argv
+  token = *esp;
+  *esp -= sizeof(char **);
+  memcpy(*esp, &token, sizeof(char **));
+  // Push argc
+  *esp -= sizeof(int);
+  memcpy(*esp, &argc, sizeof(int));
+  // Push fake return addr
+  *esp -= sizeof(void *);
+  memcpy(*esp, &argv[argc], sizeof(void *));
+  // Free argv
+  free(argv);
+
   return success;
 }
 
