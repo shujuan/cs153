@@ -18,7 +18,10 @@
 #include "threads/thread.h"
 #include "threads/vaddr.h"
 
-#include "threads/synch.h"								/* Implemented in project 2 */
+#include "threads/synch.h"	
+#define WORD_SIZE 4
+#define DEFAULT_ARGV 2
+/* Implemented in project 2 */
 
 static thread_func start_process NO_RETURN;
 static bool load(const char *cmdline, void(**eip) (void), void **esp, char **saveptr);
@@ -509,8 +512,7 @@ for (i = argc; i >= 0; i--)
 }
 }
 
-#define WORD_SIZE 4
-#define DEFAULT_ARGV 2
+
 
 
 
