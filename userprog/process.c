@@ -463,7 +463,7 @@ char *cont = malloc(DEFAULT_ARGV *sizeof(char *));
 int i, argc = 0, arg_size = DEFAULT_ARGV;
 
 // push args onto the stack
-for (token = (char *)file_name; token != NULL;)
+for (token = (char *)file_name; token != NULL;token = strtok_r(NULL, " ", save_ptr))
 {
 	cont[argc] = token;
 	argc++;
@@ -512,73 +512,7 @@ for (i = argc; i >= 0; i--)
 #define WORD_SIZE 4
 #define DEFAULT_ARGV 2
 
-static bool
-setup_stack(void **esp, const char* file_name, char** save_ptr)
-{
-	uint8_t *kpage;
-	bool success = false;
 
-	kpage = palloc_get_page(PAL_USER | PAL_ZERO);
-	if (kpage != NULL)
-	{
-		success = install_page(((uint8_t *)PHYS_BASE) - PGSIZE, kpage, true);
-		if (success)
-			*esp = PHYS_BASE;
-		else
-		{
-			palloc_free_page(kpage);
-			return success;
-		}
-	}
-
-	char *token;
-	char **argv = malloc(DEFAULT_ARGV*sizeof(char *));
-	int i, argc = 0, argv_size = DEFAULT_ARGV;
-
-	// Push args onto stack
-	for (token = (char *)file_name; token != NULL;
-		token = strtok_r(NULL, " ", save_ptr))
-	{
-		*esp -= strlen(token) + 1;
-		argv[argc] = *esp;
-		argc++;
-		// Resize argv
-		if (argc >= argv_size)
-		{
-			argv_size *= 2;
-			argv = realloc(argv, argv_size*sizeof(char *));
-		}
-		memcpy(*esp, token, strlen(token) + 1);
-	}
-	argv[argc] = 0;
-	// Align to word size (4 bytes)
-	i = (size_t)*esp % WORD_SIZE;
-	if (i)
-	{
-		*esp -= i;
-		memcpy(*esp, &argv[argc], i);
-	}
-	// Push argv[i] for all i
-	for (i = argc; i >= 0; i--)
-	{
-		*esp -= sizeof(char *);
-		memcpy(*esp, &argv[i], sizeof(char *));
-	}
-	// Push argv
-	token = *esp;
-	*esp -= sizeof(char **);
-	memcpy(*esp, &token, sizeof(char **));
-	// Push argc
-	*esp -= sizeof(int);
-	memcpy(*esp, &argc, sizeof(int));
-	// Push fake return addr
-	*esp -= sizeof(void *);
-	memcpy(*esp, &argv[argc], sizeof(void *));
-	// Free argv
-	free(argv);
-
-	return success;
-}
 
 /* Adds a mapping from user virtual address UPAGE to kernel
 virtual address KPAGE to the page table.
