@@ -501,7 +501,7 @@ for (i = argc; i >= 0; i--)
 	memcpy(*esp, &argc, sizeof(int));
 	//put fake addr on stack
 	*esp -= sizeof(void *);
-	memcpy(*esp, &argc[argc], sizeof(void *));
+	memcpy(*esp, &argv[argc], sizeof(void *));
 	free(argv);
 	free(cont);
 	//hex_dump here
