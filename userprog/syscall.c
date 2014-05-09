@@ -154,11 +154,54 @@ int read(int fd, void *buffer, unsigned size)
 	}
 
 	lock_acquire(syslock);				// read from the file
-	struct file *f = process_get_file(fd);
-	// to continue!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	struct file *f = get_file(fd);
+	int bytes_read = file_read(f, buffer, size);
+	lock_release(syslock);
+	return bytes_read;
 }
 
-struct file* process_get_file(int fd)
+int write(int fd, const void* buffer, unsigned size)
+{
+	if (fd == STDOUT_FILENO)			// write buffer to console if fd = STDOUT_FILENO
+	{
+		putbuf(buffer, size);
+		return size;
+	}
+
+	lock_acquire(syslock);				// write buffer to file otherwise
+	struct file *f = get_file(fd);
+	int bytes_written = file_write(f, buffer, size);
+	lock_release(syslock);
+	return bytes_written;
+}
+
+void seek(int fd, unsigned position)
+{
+	lock_acquire(syslock);
+	struct file *f = get_file(fd);
+	file_seek(f, position);
+	lock_release(syslock);
+}
+
+unsigned tell(int fd)
+{
+	unsigned position;
+	lock_acquire(syslock);
+	struct file *f = get_file(fd);
+	position = (unsigned)file_tell(f);
+	lock_release(syslock);
+	return position;
+}
+
+void close(int fd)
+{
+	lock_acquire(syslock);
+	struct file *f = get_file(fd);
+	file_close(f);
+	lock_release(syslock);
+}
+
+struct file* get_file(int fd)
 {
 	struct thread *t = thread_current();
 	struct list_elem *e;
