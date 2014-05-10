@@ -472,7 +472,7 @@ for (token = (char *)file_name; token != NULL;token = strtok_r(NULL, " ", save_p
 	argc++;
 	if (argc >= arg_size)
 	{
-		argv_size *= 2;
+		arg_size *= 2;
 		cont = realloc(cont, arg_size *sizeof(char *));
 		argv = realloc(argv, arg_size *sizeof(char *));
 	}
