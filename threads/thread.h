@@ -100,6 +100,9 @@ struct thread
 	struct semaphore *load_sema;		/* load the semaphone of current thread */
 	struct list file_list;				/* store the list of files of the thread */
 	int fd;						/* file descriptor*/
+	struct list child_list;
+	tid_t parent;
+	struct child_process* cp;
 
 
 	/* Implemented in project 1 */
