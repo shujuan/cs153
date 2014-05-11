@@ -225,18 +225,17 @@ int filesize(int fd)
 
 int read(int fd, void *buffer, unsigned size)
 {
-	if (fd == STDIN_FILENO)				// read from keyboard if fd = 0
+  if (fd == STDIN_FILENO)
+    {
+      unsigned i;
+      uint8_t* local_buffer = (uint8_t *) buffer;
+      for (i = 0; i < size; i++)
 	{
-		int i = 0;
-		char c;
-		while (i < size && (c = input_getc()) != "\n")
-		{
-			
-			&buffer += c; // ??? problematic
-			i++;
-		}
-		return i;
+	  local_buffer[i] = input_getc();
 	}
+      return size;
+    }
+
 
 	lock_acquire(syslock);				// read from the file
 	struct file *f = get_file(fd);
