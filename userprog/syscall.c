@@ -17,11 +17,18 @@ struct process_file
 	struct list_elem elem;
 };
 
+void
+syscall_init(void)
+{
+	intr_register_int(0x30, 3, INTR_ON, syscall_handler, "syscall");
+}
+
 static void syscall_handler(struct intr_frame *f UNUSED)
 {
 	int arg[MAX_ARGS];
 	int esp = getpage_prt((const void *)f->esp);
-	switch (*(int *)esp){
+	switch (*(int *)esp)
+	{
 		case SYS_HALT:
 	{
 		halt();
@@ -215,11 +222,6 @@ struct file* get_file(int fd)
 	return NULL;
 }
 
-void
-syscall_init(void)
-{
-	intr_register_int(0x30, 3, INTR_ON, syscall_handler, "syscall");
-}
 
 static void
 syscall_handler(struct intr_frame *f UNUSED)
