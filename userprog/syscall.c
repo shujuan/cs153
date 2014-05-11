@@ -19,7 +19,7 @@ struct process_file
 
 static void syscall_handler(struct intr_frame *f UNUSED)
 {
-	int argv[MAX_ARGS];
+	int arg[MAX_ARGS];
 	int esp = getpage_prt((const void *)f->esp);
 	switch (*(int *)esp){
 		case SYS_HALT:
@@ -30,8 +30,8 @@ static void syscall_handler(struct intr_frame *f UNUSED)
 	case SYS_EXEC:
 	{
 		get_args(f, arg, 1);
-		check_string((const void *)argv[0]);
-		f->eax = exec((const void *)argv[0]);
+		check_string((const void *)arg[0]);
+		f->eax = exec((const void *)arg[0]);
 		break;
 	}
 /*	case SYS_EXEC:
