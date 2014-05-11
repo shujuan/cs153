@@ -19,22 +19,22 @@ struct process_file
 
 static void syscall_handler(struct intr_frame *f UNUSED)
 {
-	int arg[MAX_ARGS];
+	int argv[MAX_ARGS];
 	int esp = getpage_prt((const void *)f->esp);
 	switch (*(int *)esp)
-		case SYS_HALT
+		case SYS_HALT:
 	{
 		halt();
 		break;
 	}
-	case SYS_EXEC
+	case SYS_EXEC:
 	{
 		get_args(f, arg, 1);
 		check_string((const void *)argv[0]);
 		f->eax = exec((const void *)argv[0]);
 		break;
 	}
-	case SYS_EXEC
+/*	case SYS_EXEC:
 	case SYS_WAIT
 	case SYS_CREATE
 	case SYS_REMOVE
@@ -44,7 +44,7 @@ static void syscall_handler(struct intr_frame *f UNUSED)
 	case SYS_WRITE
 	case SYS_SEEK
 	case SYS_TELL
-	case SYS_CLOSE
+	case SYS_CLOSE*/
 }
 
 pid_t exec(const char* cmd_line)
