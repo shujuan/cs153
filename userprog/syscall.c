@@ -45,7 +45,7 @@ syscall_init(void)
 static void syscall_handler(struct intr_frame *f UNUSED)
 {
 	int arg[MAX_ARGS];
-	int esp = getpage_prt((const void *)f->esp);
+	int esp = getpage_ptr((const void *)f->esp);
 	switch (*(int *)esp)
 	{
 		case SYS_HALT:
@@ -55,35 +55,35 @@ static void syscall_handler(struct intr_frame *f UNUSED)
 	}
 	case SYS_EXEC:
 	{
-		get_args(f, arg, 1);
-		check_string((const void *)arg[0]);
-		f->eax = exec((const void *)arg[0]);
+		get_arg(f, arg, 1);
+		arg[0] = user_to_kernel((const void *) arg[0]);
+		f->eax = exec((const char *) arg[0]); 
 		break;
 	}
 	 case SYS_WAIT:
       {
-	get_arg(f, arg, 1);
-	f->eax = wait(arg[0]);
-	break;
+		get_arg(f, arg, 1);
+		f->eax = wait(arg[0]);
+		break;
       }
     case SYS_CREATE:
       {
 	get_arg(f, arg, 2);
-	arg[0] = user_to_kernel_ptr((const void *) arg[0]);
+	arg[0] = user_to_kernel((const void *) arg[0]);
 	f->eax = create((const char *)arg[0], (unsigned) arg[1]);
 	break;
       }
     case SYS_REMOVE:
       {
 	get_arg(f, arg, 1);
-	arg[0] = user_to_kernel_ptr((const void *) arg[0]);
+	arg[0] = user_to_kernel((const void *) arg[0]);
 	f->eax = remove((const char *) arg[0]);
 	break;
       }
     case SYS_OPEN:
       {
 	get_arg(f, arg, 1);
-	arg[0] = user_to_kernel_ptr((const void *) arg[0]);
+	arg[0] = user_to_kernel((const void *) arg[0]);
 	f->eax = open((const char *) arg[0]);
 	break; 		
       }
@@ -96,16 +96,16 @@ static void syscall_handler(struct intr_frame *f UNUSED)
     case SYS_READ:
       {
 	get_arg(f, arg, 3);
-	check_valid_buffer((void *) arg[1], (unsigned) arg[2]);
-	arg[1] = user_to_kernel_ptr((const void *) arg[1]);
+	check_buffer((void *) arg[1], (unsigned) arg[2]);
+	arg[1] = user_to_kernel((const void *) arg[1]);
 	f->eax = read(arg[0], (void *) arg[1], (unsigned) arg[2]);
 	break;
       }
     case SYS_WRITE:
       { 
 	get_arg(f, arg, 3);
-	check_valid_buffer((void *) arg[1], (unsigned) arg[2]);
-	arg[1] = user_to_kernel_ptr((const void *) arg[1]);
+	check_buffer((void *) arg[1], (unsigned) arg[2]);
+	arg[1] = user_to_kernel((const void *) arg[1]);
 	f->eax = write(arg[0], (const void *) arg[1],
 		       (unsigned) arg[2]);
 	break;
@@ -129,7 +129,7 @@ static void syscall_handler(struct intr_frame *f UNUSED)
 	break;
       }
     }
-	
+
 }
 
 pid_t exec(const char* cmd_line)
@@ -158,7 +158,7 @@ void exit(int status)
 	struct thread *cur_thread = thread_current();
 	if (thread_alive(cur_thread->parent))
 	{
-		cur_thread->parent->status = status; //????????????????
+		cur_thread->cp->status = status; //????????????????
 	}
 	thread_exit();
 }
@@ -284,7 +284,7 @@ void close(int fd)
 	lock_release(syslock);
 }
 
-void check_valid (const void *vaddr)
+void check_ptr (const void *vaddr)
 {
   if (!is_user_vaddr(vaddr) || vaddr < USER_VADDR_BOTTOM)
     {
@@ -382,7 +382,7 @@ struct child_process* get_child (int pid)
   return NULL;
 }
 
-void remove_child (struct child_process *cp)
+/*void remove_child (struct child_process *cp)
 {
   list_remove(&cp->elem);
   free(cp);
@@ -402,9 +402,9 @@ void remove_child (void)
       free(cp);
       e = next;
     }
-}
+}*/
 
-void get_arg (struct intr_frame *f, int *arg, int n)
+void get_arg(struct intr_frame *f, int *arg, int n)
 {
   int i;
   int *ptr;
@@ -425,11 +425,4 @@ void check_buffer (void* buffer, unsigned size)
       check_ptr((const void*) local_buffer);
       local_buffer++;
     }
-}
-
-static void
-syscall_handler(struct intr_frame *f UNUSED)
-{
-	printf("system call!\n");
-	thread_exit();
 }
