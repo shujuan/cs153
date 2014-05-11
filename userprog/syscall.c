@@ -21,7 +21,7 @@ static void syscall_handler(struct intr_frame *f UNUSED)
 {
 	int argv[MAX_ARGS];
 	int esp = getpage_prt((const void *)f->esp);
-	switch (*(int *)esp)
+	switch (*(int *)esp){
 		case SYS_HALT:
 	{
 		halt();
@@ -35,16 +35,17 @@ static void syscall_handler(struct intr_frame *f UNUSED)
 		break;
 	}
 /*	case SYS_EXEC:
-	case SYS_WAIT
-	case SYS_CREATE
-	case SYS_REMOVE
-	case SYS_OPEN
-	case SYS_FILESIZE
-	case SYS_READ
-	case SYS_WRITE
-	case SYS_SEEK
-	case SYS_TELL
-	case SYS_CLOSE*/
+	case SYS_WAIT:
+	case SYS_CREATE:
+	case SYS_REMOVE:
+	case SYS_OPEN:
+	case SYS_FILESIZE:
+	case SYS_READ:
+	case SYS_WRITE:
+	case SYS_SEEK:
+	case SYS_TELL:
+	case SYS_CLOSE:*/
+	}
 }
 
 pid_t exec(const char* cmd_line)
