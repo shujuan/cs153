@@ -129,7 +129,7 @@ static void syscall_handler(struct intr_frame *f UNUSED)
 	break;
       }
     }
-	}
+	
 }
 
 pid_t exec(const char* cmd_line)
