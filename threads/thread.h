@@ -99,6 +99,7 @@ struct thread
 	uint8_t load;						/* determine whether the loading is successful or not */
 	struct semaphore *load_sema;		/* load the semaphone of current thread */
 	struct list file_list;				/* store the list of files of the thread */
+	int fd;						/* file descriptor*/
 
 
 	/* Implemented in project 1 */
