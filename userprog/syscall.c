@@ -134,19 +134,18 @@ static void syscall_handler(struct intr_frame *f UNUSED)
 
 pid_t exec(const char* cmd_line)
 {
-	pid_t pid = process_execute(cmd_line);
-	struct child_process *cp = get_child_process(pid);
-	if (!cp) { return ERROR; }
-	if (cp->load == NOT_LOADED)
-	{
-		sema_down(&cp->load_sema);
-	}
-	if (cp->load == LOAD_FAIL)
-	{
-		remove_cp(cp);
-		return ERROR;
-	}
-	return pid;
+  pid_t pid = process_execute(cmd_line);
+  struct child_process* cp = get_child(pid);
+  ASSERT(cp);
+  while (cp->load == NOT_LOADED)
+    {
+      barrier();
+    }
+  if (cp->load == LOAD_FAIL)
+    {
+      return ERROR;
+    }
+  return pid;
 }
 
 void halt(void)
