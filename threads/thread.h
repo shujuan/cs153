@@ -102,7 +102,7 @@ struct thread
 	int fd;						/* file descriptor*/
 	struct list child_list;
 	tid_t parent;
-	struct child_process* cp;
+
 
 
 	/* Implemented in project 1 */
