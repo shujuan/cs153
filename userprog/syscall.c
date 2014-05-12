@@ -18,7 +18,6 @@
 #define USER_VADDR_BOTTOM ((void *) 0x08048000)
 
 struct lock *syslock;
-int fd = 1;
 
 struct process_file
 {
@@ -45,14 +44,20 @@ syscall_init(void)
 static void syscall_handler(struct intr_frame *f UNUSED)
 {
 	int arg[MAX_ARGS];
-	int esp = getpage_ptr((const void *)f->esp);
-	switch (*(int *)esp)
+	check_valid_ptr((const void*) f->esp);
+	switch (*(int *)f->esp)
 	{
 		case SYS_HALT:
 	{
 		halt();
 		break;
 	}
+	    case SYS_EXIT:
+        {
+		get_arg(f, &arg[0], 1);
+		exit(arg[0]);
+		break;
+      	}
 	case SYS_EXEC:
 	{
 		get_arg(f, arg, 1);
@@ -294,9 +299,6 @@ void check_ptr (const void *vaddr)
 
 int user_to_kernel(const void *vaddr)
 {
-  // TO DO: Need to check if all bytes within range are correct
-  // for strings + buffers
-  check_ptr(vaddr);
   void *ptr = pagedir_get_page(thread_current()->pagedir, vaddr);
   if (!ptr)
     {
@@ -382,7 +384,7 @@ struct child_process* get_child (int pid)
   return NULL;
 }
 
-/*void remove_child (struct child_process *cp)
+void remove_child (struct child_process *cp)
 {
   list_remove(&cp->elem);
   free(cp);
@@ -402,7 +404,7 @@ void remove_child (void)
       free(cp);
       e = next;
     }
-}*/
+}
 
 void get_arg(struct intr_frame *f, int *arg, int n)
 {
