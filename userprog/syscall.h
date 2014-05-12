@@ -22,8 +22,8 @@ struct child_process {
 
 struct child_process* add_child (int pid);
 struct child_process* get_child (int pid);
-//void remove_child (struct child_process *cp);
-//void remove_child (void);
+void remove_child (struct child_process *cp);
+void remove_child (void);
 
 void process_close_file (int fd);
 
