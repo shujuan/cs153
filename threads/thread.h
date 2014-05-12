@@ -5,10 +5,6 @@
 #include <list.h>
 #include <stdint.h>
 
-#define LOADED 2				/* Implememted in project 2 */
-#define NOT_LOADED 1
-#define LOAD_FAIL 0
-
 /* States in a thread's life cycle. */
 enum thread_status
   {
